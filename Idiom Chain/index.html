@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>成语接龙对决</title>
+  <style>
+    :root {
+      --bg: #efe0c7;
+      --bg-deep: #d7b889;
+      --panel: rgba(255, 249, 239, 0.88);
+      --panel-strong: rgba(255, 248, 236, 0.96);
+      --ink: #24160f;
+      --ink-soft: #694d40;
+      --accent: #8f1f15;
+      --accent-deep: #5e120d;
+      --gold: #b6893d;
+      --line: rgba(87, 46, 26, 0.14);
+      --success: #235c3d;
+      --warning: #8b4d08;
+      --danger: #8d1e14;
+      --shadow: 0 24px 60px rgba(56, 31, 20, 0.18);
+      --radius: 26px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "STKaiti", "KaiTi", "FangSong", serif;
+      background:
+        radial-gradient(circle at top left, rgba(143, 31, 21, 0.16), transparent 32%),
+        radial-gradient(circle at 90% 10%, rgba(182, 137, 61, 0.18), transparent 26%),
+        linear-gradient(135deg, var(--bg), var(--bg-deep));
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(63, 38, 29, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(63, 38, 29, 0.045) 1px, transparent 1px);
+      background-size: 38px 38px;
+      mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
+    }
+
+    .page {
+      width: min(1180px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 24px 0 36px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .seal {
+      width: 70px;
+      height: 70px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(155deg, var(--accent), var(--accent-deep));
+      border-radius: 20px;
+      color: #fff6eb;
+      font-size: 26px;
+      letter-spacing: 3px;
+      box-shadow: 0 18px 28px rgba(94, 18, 13, 0.25);
+      transform: rotate(-7deg);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 4.2vw, 48px);
+      letter-spacing: 3px;
+      line-height: 1.1;
+    }
+
+    .subline {
+      margin-top: 6px;
+      color: var(--ink-soft);
+      font-size: 15px;
+      letter-spacing: 1px;
+    }
+
+    .round-chip {
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255, 251, 245, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: var(--shadow);
+      color: var(--accent-deep);
+      font-size: 15px;
+      letter-spacing: 1px;
+    }
+
+    .arena {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+      gap: 22px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .battle {
+      padding: 26px;
+    }
+
+    .duel-head {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .fighter {
+      padding: 18px;
+      min-height: 150px;
+      border-radius: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fighter::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px -46px auto;
+      width: 120px;
+      height: 120px;
+      border-radius: 999px;
+      opacity: 0.14;
+    }
+
+    .fighter-user {
+      background: linear-gradient(145deg, rgba(255, 250, 242, 0.92), rgba(240, 226, 204, 0.9));
+      border: 1px solid rgba(130, 85, 45, 0.14);
+    }
+
+    .fighter-user::after {
+      background: var(--gold);
+    }
+
+    .fighter-bot {
+      background: linear-gradient(145deg, rgba(143, 31, 21, 0.94), rgba(94, 18, 13, 0.97));
+      color: #fff8ee;
+    }
+
+    .fighter-bot::after {
+      background: rgba(255, 240, 214, 0.8);
+    }
+
+    .fighter-role {
+      font-size: 13px;
+      letter-spacing: 3px;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+
+    .fighter-name {
+      font-size: 28px;
+      letter-spacing: 4px;
+      margin-bottom: 18px;
+    }
+
+    .fighter-tag {
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      letter-spacing: 1px;
+      background: rgba(255, 255, 255, 0.16);
+      color: inherit;
+    }
+
+    .versus {
+      display: grid;
+      place-items: center;
+      height: 100%;
+    }
+
+    .versus-mark {
+      width: 86px;
+      height: 86px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--gold), #d7b26a);
+      color: #4a2a18;
+      font-size: 28px;
+      letter-spacing: 2px;
+      box-shadow: 0 16px 26px rgba(183, 136, 61, 0.28);
+    }
+
+    .status-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px 20px;
+      margin-bottom: 18px;
+      border-radius: 22px;
+      background: rgba(255, 252, 247, 0.84);
+      border: 1px solid rgba(143, 31, 21, 0.12);
+      min-height: 92px;
+    }
+
+    .status-banner.is-info {
+      border-color: rgba(143, 31, 21, 0.16);
+    }
+
+    .status-banner.is-success {
+      background: rgba(237, 248, 240, 0.92);
+      border-color: rgba(35, 92, 61, 0.2);
+    }
+
+    .status-banner.is-warning {
+      background: rgba(255, 245, 228, 0.94);
+      border-color: rgba(139, 77, 8, 0.22);
+    }
+
+    .status-banner.is-danger {
+      background: rgba(255, 236, 232, 0.94);
+      border-color: rgba(141, 30, 20, 0.24);
+    }
+
+    .status-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      flex: 0 0 auto;
+      background: rgba(255, 255, 255, 0.66);
+    }
+
+    .status-copy {
+      flex: 1;
+    }
+
+    .status-label {
+      margin: 0 0 6px;
+      font-size: 16px;
+      letter-spacing: 2px;
+    }
+
+    .status-text {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    .current-box {
+      padding: 22px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(40, 20, 14, 0.96), rgba(104, 26, 20, 0.94));
+      color: #fff8ef;
+      box-shadow: 0 20px 40px rgba(83, 25, 17, 0.24);
+    }
+
+    .current-caption {
+      font-size: 13px;
+      letter-spacing: 4px;
+      opacity: 0.76;
+      margin-bottom: 12px;
+    }
+
+    .current-word {
+      font-size: clamp(32px, 5vw, 58px);
+      letter-spacing: 12px;
+      padding-left: 12px;
+      margin-bottom: 10px;
+      white-space: nowrap;
+    }
+
+    .current-note {
+      color: rgba(255, 248, 239, 0.78);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .action-zone {
+      margin-top: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .input-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 162px;
+      gap: 14px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 18px 20px;
+      border-radius: 18px;
+      border: 2px solid rgba(143, 31, 21, 0.12);
+      background: rgba(255, 255, 255, 0.82);
+      font-size: 24px;
+      color: var(--ink);
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: rgba(143, 31, 21, 0.45);
+      box-shadow: 0 0 0 5px rgba(143, 31, 21, 0.08);
+      transform: translateY(-1px);
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      border-radius: 18px;
+      font-size: 18px;
+      letter-spacing: 2px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .primary-btn {
+      color: #fff8ef;
+      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+      box-shadow: 0 16px 28px rgba(94, 18, 13, 0.24);
+    }
+
+    .secondary-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .ghost-btn {
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.68);
+      color: var(--accent-deep);
+      border: 1px solid rgba(143, 31, 21, 0.12);
+    }
+
+    .danger-btn {
+      background: rgba(141, 30, 20, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(141, 30, 20, 0.14);
+    }
+
+    .side {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .side-title {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 2px;
+    }
+
+    .score-card {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .score {
+      padding: 16px;
+      border-radius: 20px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+
+    .score-label {
+      color: var(--ink-soft);
+      font-size: 12px;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .score-value {
+      font-size: 30px;
+      color: var(--accent-deep);
+    }
+
+    .history {
+      min-height: 480px;
+      padding: 8px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.56);
+      border: 1px solid var(--line);
+    }
+
+    .history-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .history-item {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 252, 247, 0.9);
+      border: 1px solid rgba(94, 18, 13, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .history-item::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--gold), var(--accent));
+    }
+
+    .history-time {
+      margin-bottom: 10px;
+      color: var(--ink-soft);
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+
+    .history-words {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .history-role {
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+    }
+
+    .history-word {
+      font-size: 24px;
+      letter-spacing: 3px;
+    }
+
+    .history-arrow {
+      color: var(--accent);
+      font-size: 20px;
+    }
+
+    .empty {
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: 17px;
+      line-height: 1.8;
+      padding: 20px;
+    }
+
+    .hint-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .hint {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(182, 137, 61, 0.12);
+      color: #6e4d18;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 960px) {
+      .arena {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .duel-head {
+        grid-template-columns: 1fr;
+      }
+
+      .versus {
+        order: 2;
+      }
+
+      .input-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .history-words {
+        grid-template-columns: 1fr;
+      }
+
+      .history-arrow {
+        display: none;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="title-wrap">
+        <div class="seal">斗</div>
+        <div>
+          <h1>成语接龙对决</h1>
+          <div class="subline">你与智能体轮番出招，直到一方认输重开。</div>
+        </div>
+      </div>
+      <div class="round-chip" id="roundChip">第 1 局</div>
+    </header>
+
+    <section class="arena">
+      <section class="card battle">
+        <div class="duel-head">
+          <article class="fighter fighter-user">
+            <div class="fighter-role">PLAYER</div>
+            <div class="fighter-name">你</div>
+            <div class="fighter-tag">等待你的应招</div>
+          </article>
+
+          <div class="versus">
+            <div class="versus-mark">VS</div>
+          </div>
+
+          <article class="fighter fighter-bot">
+            <div class="fighter-role">BOT</div>
+            <div class="fighter-name">智能体</div>
+            <div class="fighter-tag">先手开局</div>
+          </article>
+        </div>
+
+        <div class="status-banner is-info" id="statusBanner">
+          <div class="status-icon" id="statusIcon">报</div>
+          <div class="status-copy">
+            <h2 class="status-label" id="statusLabel">对战播报</h2>
+            <p class="status-text" id="statusText">正在请智能体先手出题。</p>
+          </div>
+        </div>
+
+        <div class="current-box">
+          <div class="current-caption">智能体当前出招</div>
+          <div class="current-word" id="currentIdiom">载入中</div>
+          <div class="current-note">请根据这个成语继续接龙，输入你的四字成语应战。</div>
+        </div>
+
+        <div class="action-zone">
+          <div class="input-panel">
+            <input id="idiomInput" type="text" maxlength="4" placeholder="输入你的四字成语" autocomplete="off">
+            <button class="primary-btn" id="submitButton" type="button">立即应战</button>
+          </div>
+
+          <div class="secondary-actions">
+            <button class="ghost-btn danger-btn" id="userSurrenderButton" type="button">我认输，重开一局</button>
+            <button class="ghost-btn" id="botSurrenderButton" type="button">判定智能体认输</button>
+          </div>
+
+          <div class="hint-row">
+            <span class="hint">非法输入会在上方红色战报中提示</span>
+            <span class="hint">智能体会先手给出开局成语</span>
+            <span class="hint">任意一方认输都会立即重开</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="card side">
+        <h2 class="side-title">对战记录</h2>
+
+        <div class="score-card">
+          <div class="score">
+            <div class="score-label">本局回合</div>
+            <div class="score-value" id="turnCount">0</div>
+          </div>
+          <div class="score">
+            <div class="score-label">当前先手</div>
+            <div class="score-value" style="font-size:22px;">智能体</div>
+          </div>
+        </div>
+
+        <div class="history">
+          <ul class="history-list" id="historyList"></ul>
+          <div class="empty" id="emptyState">
+            智能体会先出一个成语。<br>
+            你接出下一个四字成语，就算正式开战。
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const currentIdiomEl = document.getElementById("currentIdiom");
+    const statusBannerEl = document.getElementById("statusBanner");
+    const statusIconEl = document.getElementById("statusIcon");
+    const statusLabelEl = document.getElementById("statusLabel");
+    const statusTextEl = document.getElementById("statusText");
+    const historyListEl = document.getElementById("historyList");
+    const emptyStateEl = document.getElementById("emptyState");
+    const idiomInputEl = document.getElementById("idiomInput");
+    const submitButtonEl = document.getElementById("submitButton");
+    const userSurrenderButtonEl = document.getElementById("userSurrenderButton");
+    const botSurrenderButtonEl = document.getElementById("botSurrenderButton");
+    const roundChipEl = document.getElementById("roundChip");
+    const turnCountEl = document.getElementById("turnCount");
+
+    function sanitizeIdiom(value) {
+      return (value || "").replace(/[^\u4e00-\u9fff]/g, "").slice(0, 4);
+    }
+
+    function setBanner(type, title, message) {
+      const iconMap = {
+        info: "报",
+        success: "成",
+        warning: "警",
+        danger: "误"
+      };
+
+      statusBannerEl.className = `status-banner is-${type}`;
+      statusIconEl.textContent = iconMap[type] || "报";
+      statusLabelEl.textContent = title;
+      statusTextEl.textContent = message;
+    }
+
+    function setBusy(isBusy, message) {
+      submitButtonEl.disabled = isBusy;
+      userSurrenderButtonEl.disabled = isBusy;
+      botSurrenderButtonEl.disabled = isBusy;
+      if (isBusy) {
+        setBanner("info", "对战播报", message);
+      }
+    }
+
+    function renderHistory(history) {
+      historyListEl.innerHTML = "";
+      turnCountEl.textContent = String(history.length);
+
+      if (!history || history.length === 0) {
+        emptyStateEl.style.display = "grid";
+        return;
+      }
+
+      emptyStateEl.style.display = "none";
+
+      history.forEach((item) => {
+        const li = document.createElement("li");
+        li.className = "history-item";
+        li.innerHTML = `
+          <div class="history-time">${item.time || "--:--:--"}</div>
+          <div class="history-words">
+            <div>
+              <div class="history-role">你</div>
+              <div class="history-word">${item.user || "-"}</div>
+            </div>
+            <div class="history-arrow">→</div>
+            <div>
+              <div class="history-role">智能体</div>
+              <div class="history-word">${item.ai || "-"}</div>
+            </div>
+          </div>
+        `;
+        historyListEl.appendChild(li);
+      });
+    }
+
+    function renderRoundInfo(data) {
+      currentIdiomEl.textContent = data.current_idiom || "待开始";
+      roundChipEl.textContent = `第 ${data.round_id || 1} 局`;
+      renderHistory(data.history || []);
+    }
+
+    function showStateMessage(data, fallbackType = "info") {
+      const message = data.status_message || "新的一局已经准备好。";
+      const type = data.history && data.history.length > 0 ? "success" : fallbackType;
+      setBanner(type, "对战播报", message);
+    }
+
+    async function loadState() {
+      setBusy(true, "正在请智能体先手开局。");
+
+      try {
+        const response = await fetch("/api/state");
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "载入状态失败");
+        }
+
+        renderRoundInfo(data);
+        showStateMessage(data, "info");
+      } catch (error) {
+        setBanner("danger", "载入失败", `初始化对局失败：${error.message}`);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function playGame() {
+      const userInput = sanitizeIdiom(idiomInputEl.value.trim());
+      idiomInputEl.value = userInput;
+
+      if (!userInput) {
+        setBanner("danger", "非法操作", "你还没有出招。请输入一个四字成语后再应战。");
+        idiomInputEl.focus();
+        return;
+      }
+
+      if (userInput.length !== 4) {
+        setBanner("danger", "非法操作", "出招无效：只能输入恰好 4 个汉字的成语。");
+        idiomInputEl.focus();
+        return;
+      }
+
+      setBusy(true, `你出了“${userInput}”，智能体正在接招。`);
+
+      try {
+        const response = await fetch("/api/play", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idiom: userInput })
+        });
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "智能体未能完成接龙");
+        }
+
+        renderRoundInfo(data);
+        idiomInputEl.value = "";
+        idiomInputEl.focus();
+        setBanner("success", "接龙成功", data.status_message || `智能体接出“${data.sdk_response}”。`);
+      } catch (error) {
+        setBanner("danger", "接龙失败", error.message);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function resetGame(surrenderBy) {
+      const surrenderText = surrenderBy === "user" ? "你认输，正在重开一局。" : "判定智能体认输，正在重开一局。";
+      setBusy(true, surrenderText);
+
+      try {
+        const response = await fetch("/api/reset", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ surrender_by: surrenderBy })
+        });
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "重开失败");
+        }
+
+        renderRoundInfo(data);
+        idiomInputEl.value = "";
+        idiomInputEl.focus();
+        setBanner("warning", "重新开局", data.status_message || "新的对局已开始。");
+      } catch (error) {
+        setBanner("danger", "重开失败", error.message);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    idiomInputEl.addEventListener("input", () => {
+      idiomInputEl.value = sanitizeIdiom(idiomInputEl.value);
+    });
+
+    idiomInputEl.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        playGame();
+      }
+    });
+
+    submitButtonEl.addEventListener("click", playGame);
+    userSurrenderButtonEl.addEventListener("click", () => resetGame("user"));
+    botSurrenderButtonEl.addEventListener("click", () => resetGame("bot"));
+
+    loadState();
+  </script>
+</body>
+</html>
