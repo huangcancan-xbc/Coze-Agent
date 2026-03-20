@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>历史海报制作</title>
+  <style>
+    :root {
+      --bg: #f3ecdf;
+      --paper: rgba(255, 250, 242, 0.92);
+      --ink: #22150f;
+      --soft: #6b5646;
+      --accent: #8f1f18;
+      --gold: #b98a40;
+      --line: rgba(80, 44, 27, 0.12);
+      --shadow: 0 24px 50px rgba(56, 31, 20, 0.16);
+      --radius: 24px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "STKaiti", "KaiTi", "FangSong", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(143,31,24,.16), transparent 28%),
+        radial-gradient(circle at 85% 10%, rgba(185,138,64,.18), transparent 24%),
+        linear-gradient(135deg, #f5efe4, #e6d1b0);
+    }
+    .page {
+      width: min(1180px, calc(100vw - 28px));
+      margin: 0 auto;
+      padding: 24px 0 36px;
+    }
+    .hero, .panel {
+      background: var(--paper);
+      border: 1px solid rgba(255,255,255,.7);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      backdrop-filter: blur(10px);
+    }
+    .hero {
+      padding: 26px 28px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 20px;
+      align-items: center;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(143,31,24,.08);
+      color: var(--accent);
+      letter-spacing: 2px;
+      font-size: 13px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: var(--accent);
+    }
+    h1 {
+      margin: 16px 0 12px;
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 1.08;
+      letter-spacing: 2px;
+    }
+    .hero p, .hero a {
+      color: var(--soft);
+      font-size: 17px;
+      line-height: 1.8;
+    }
+    .hero a { color: var(--accent); text-decoration: none; }
+    .stat-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.6);
+      border: 1px solid var(--line);
+    }
+    .stat-label { color: var(--soft); font-size: 13px; letter-spacing: 1px; margin-bottom: 8px; }
+    .stat-value { font-size: 20px; color: var(--accent); }
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 430px) minmax(0, 1fr);
+      gap: 20px;
+    }
+    .panel { padding: 24px; }
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 26px;
+      letter-spacing: 2px;
+    }
+    .hint {
+      color: var(--soft);
+      font-size: 15px;
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 170px;
+      resize: vertical;
+      border-radius: 18px;
+      border: 1px solid rgba(143,31,24,.14);
+      background: rgba(255,255,255,.78);
+      padding: 16px;
+      font: inherit;
+      font-size: 18px;
+      line-height: 1.8;
+      color: var(--ink);
+      outline: none;
+    }
+    textarea:focus {
+      border-color: rgba(143,31,24,.4);
+      box-shadow: 0 0 0 4px rgba(143,31,24,.08);
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 14px 0 18px;
+    }
+    .chip, button {
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+      border-radius: 999px;
+      transition: .2s ease;
+    }
+    .chip {
+      padding: 9px 14px;
+      background: rgba(185,138,64,.14);
+      color: #6c4c1c;
+      font-size: 14px;
+    }
+    .chip:hover, button:hover:not(:disabled) { transform: translateY(-1px); }
+    .actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .primary {
+      padding: 12px 18px;
+      color: #fff8ee;
+      background: linear-gradient(135deg, var(--accent), #67140f);
+      box-shadow: 0 16px 30px rgba(94,18,13,.22);
+      font-size: 16px;
+      letter-spacing: 1px;
+    }
+    .secondary {
+      padding: 12px 18px;
+      background: rgba(255,255,255,.7);
+      color: var(--accent);
+      border: 1px solid rgba(143,31,24,.1);
+    }
+    button:disabled { opacity: .65; cursor: wait; }
+    .status {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.65);
+      min-height: 84px;
+    }
+    .status.error { background: rgba(255,236,232,.92); border-color: rgba(143,31,24,.18); }
+    .status.success { background: rgba(237,248,240,.92); border-color: rgba(45,108,71,.18); }
+    .status strong { display: block; margin-bottom: 6px; font-size: 16px; }
+    .status p { margin: 0; line-height: 1.75; color: var(--soft); }
+    .preview {
+      display: grid;
+      gap: 16px;
+    }
+    .poster-frame {
+      min-height: 360px;
+      border-radius: 22px;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(34,21,15,.95), rgba(111,39,28,.92));
+      display: grid;
+      place-items: center;
+      color: rgba(255,248,238,.88);
+      text-align: center;
+      padding: 24px;
+    }
+    .poster-frame img {
+      display: block;
+      width: 100%;
+      max-height: 720px;
+      object-fit: cover;
+      border-radius: 18px;
+      box-shadow: 0 18px 34px rgba(0,0,0,.22);
+    }
+    .result-card {
+      padding: 20px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.65);
+    }
+    .result-card h3 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      letter-spacing: 1px;
+    }
+    .markdown {
+      color: var(--soft);
+      line-height: 1.85;
+      font-size: 16px;
+    }
+    .markdown h4 {
+      color: var(--accent);
+      margin: 14px 0 8px;
+      font-size: 18px;
+    }
+    .markdown ul { margin: 8px 0 0 18px; padding: 0; }
+    .markdown p { margin: 8px 0; }
+    .follow-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .follow-btn {
+      padding: 8px 12px;
+      background: rgba(143,31,24,.08);
+      color: var(--accent);
+      border-radius: 16px;
+      font-size: 14px;
+    }
+    .meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--soft);
+      font-size: 14px;
+    }
+    @media (max-width: 920px) {
+      .hero, .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Coze SDK Web App</div>
+        <h1>历史信息一键生成海报</h1>
+        <p>输入一个历史人物、事件或典故，系统会调用 Coze 智能体生成对应海报、标题和历史要点总结。</p>
+        <p><a id="shareLink" href="#" target="_blank" rel="noreferrer">查看原始 Coze 智能体</a></p>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">当前接入智能体</div>
+        <div class="stat-value" id="botName">历史海报制作</div>
+        <div class="stat-label" style="margin-top:14px;">推荐输入示例</div>
+        <div class="stat-value" id="exampleTip">岳飞精忠报国</div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <section class="panel">
+        <h2 class="section-title">输入历史主题</h2>
+        <div class="hint">建议输入具体的人物、事件或典故，例如“玄奘西行取经”“丝绸之路的开辟”。</div>
+        <textarea id="topicInput" placeholder="例如：请为郑和下西洋设计一张历史海报，突出航海、交流和时代背景。"></textarea>
+        <div class="chips" id="exampleChips"></div>
+        <div class="actions">
+          <button class="primary" id="generateBtn">生成历史海报</button>
+          <button class="secondary" id="clearBtn">清空输入</button>
+        </div>
+        <div class="status" id="statusBox">
+          <strong>准备就绪</strong>
+          <p>输入历史主题后点击“生成历史海报”。</p>
+        </div>
+      </section>
+
+      <section class="panel preview">
+        <div class="poster-frame" id="posterFrame">
+          海报将在这里显示
+        </div>
+        <div class="result-card">
+          <h3 id="titleBox">等待生成</h3>
+          <div class="meta">
+            <span id="topicMeta">主题：未开始</span>
+            <span id="botMeta">Bot：未连接</span>
+          </div>
+          <div class="markdown" id="summaryBox">
+            生成完成后，这里会展示标题、历史背景和核心信息总结。
+          </div>
+          <div class="follow-list" id="followList"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const topicInput = document.getElementById("topicInput");
+    const generateBtn = document.getElementById("generateBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const statusBox = document.getElementById("statusBox");
+    const posterFrame = document.getElementById("posterFrame");
+    const titleBox = document.getElementById("titleBox");
+    const summaryBox = document.getElementById("summaryBox");
+    const followList = document.getElementById("followList");
+    const topicMeta = document.getElementById("topicMeta");
+    const botMeta = document.getElementById("botMeta");
+    const botName = document.getElementById("botName");
+    const shareLink = document.getElementById("shareLink");
+    const exampleTip = document.getElementById("exampleTip");
+    const exampleChips = document.getElementById("exampleChips");
+
+    function setStatus(type, title, message) {
+      statusBox.className = `status${type ? ` ${type}` : ""}`;
+      statusBox.innerHTML = `<strong>${title}</strong><p>${message}</p>`;
+    }
+
+    function escapeHtml(text) {
+      return (text || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function renderMarkdown(text) {
+      const lines = (text || "").split("\n");
+      let html = "";
+      let inList = false;
+
+      for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line) {
+          if (inList) {
+            html += "</ul>";
+            inList = false;
+          }
+          continue;
+        }
+
+        const safe = escapeHtml(line)
+          .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+          .replace(/\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+
+        if (safe.startsWith("### ")) {
+          if (inList) { html += "</ul>"; inList = false; }
+          html += `<h4>${safe.slice(4)}</h4>`;
+        } else if (safe.startsWith("- ")) {
+          if (!inList) { html += "<ul>"; inList = true; }
+          html += `<li>${safe.slice(2)}</li>`;
+        } else if (safe === "---") {
+          if (inList) { html += "</ul>"; inList = false; }
+        } else {
+          if (inList) { html += "</ul>"; inList = false; }
+          html += `<p>${safe}</p>`;
+        }
+      }
+
+      if (inList) { html += "</ul>"; }
+      return html || "<p>暂无文字总结。</p>";
+    }
+
+    function setLoading(loading) {
+      generateBtn.disabled = loading;
+      clearBtn.disabled = loading;
+      generateBtn.textContent = loading ? "生成中..." : "生成历史海报";
+    }
+
+    function fillTopic(value) {
+      topicInput.value = value;
+      topicInput.focus();
+    }
+
+    function renderFollowUps(items) {
+      followList.innerHTML = "";
+      (items || []).forEach((item) => {
+        const btn = document.createElement("button");
+        btn.className = "follow-btn";
+        btn.textContent = item;
+        btn.onclick = () => fillTopic(item);
+        followList.appendChild(btn);
+      });
+    }
+
+    async function loadConfig() {
+      const res = await fetch("/api/config");
+      const data = await res.json();
+      if (!data.success) return;
+      botName.textContent = data.bot_name;
+      shareLink.href = data.share_url;
+      exampleTip.textContent = data.examples[0];
+      exampleChips.innerHTML = "";
+      data.examples.forEach((example) => {
+        const chip = document.createElement("button");
+        chip.className = "chip";
+        chip.textContent = example;
+        chip.onclick = () => fillTopic(example);
+        exampleChips.appendChild(chip);
+      });
+    }
+
+    async function generatePoster() {
+      const topic = topicInput.value.trim();
+      if (!topic) {
+        setStatus("error", "输入不能为空", "请先输入一个历史人物、事件或典故。");
+        topicInput.focus();
+        return;
+      }
+
+      setLoading(true);
+      setStatus("", "正在生成", "Coze 智能体正在生成海报与历史总结，请稍候。");
+      posterFrame.innerHTML = "正在生成海报...";
+
+      try {
+        const res = await fetch("/api/generate-poster", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topic })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || "生成失败");
+
+        posterFrame.innerHTML = `<img src="${data.poster_url}" alt="${escapeHtml(data.title)}">`;
+        titleBox.textContent = data.title;
+        summaryBox.innerHTML = renderMarkdown(data.answer_markdown);
+        topicMeta.textContent = `主题：${data.topic}`;
+        botMeta.textContent = `Bot：${data.bot_id}`;
+        renderFollowUps(data.follow_ups);
+        setStatus("success", "生成成功", "海报与历史信息已生成完成，你也可以点击下方追问建议继续扩展。");
+      } catch (error) {
+        posterFrame.innerHTML = "生成失败，请检查 Bot 配置或稍后重试。";
+        setStatus("error", "生成失败", error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    generateBtn.addEventListener("click", generatePoster);
+    clearBtn.addEventListener("click", () => {
+      topicInput.value = "";
+      topicInput.focus();
+      setStatus("", "已清空", "你可以重新输入新的历史主题。");
+    });
+    topicInput.addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        generatePoster();
+      }
+    });
+
+    loadConfig();
+  </script>
+</body>
+</html>
