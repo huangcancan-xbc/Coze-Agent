@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>动物视频生成</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div>
+        <span class="tag">Coze SDK Demo</span>
+        <h1>输入动物描述，生成对应视频</h1>
+        <p class="hero-text">这个页面会调用 Coze 智能体“动物视频生成”，返回可播放的视频链接和补充说明。</p>
+      </div>
+      <div class="hero-card">
+        <div class="meta-label">智能体</div>
+        <div class="meta-value" id="botName">加载中...</div>
+        <a id="shareLink" class="share-link" href="#" target="_blank" rel="noreferrer">查看 Coze 页面</a>
+      </div>
+    </section>
+
+    <section class="layout">
+      <section class="panel">
+        <h2>生成视频</h2>
+        <p class="hint">建议输入简洁明确的动物描述，例如“一个小猫在窗边打盹”。</p>
+        <textarea id="promptInput" placeholder="例如：一只小猫在花园里追蝴蝶，阳光温暖，画面轻松可爱"></textarea>
+        <div class="chips" id="exampleChips"></div>
+        <div class="actions">
+          <button id="generateBtn" class="primary">开始生成</button>
+          <button id="clearBtn" class="secondary">清空</button>
+        </div>
+        <div id="statusBox" class="status">
+          <strong>准备就绪</strong>
+          <p>输入描述后点击“开始生成”。</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>视频结果</h2>
+        <div class="video-box" id="videoBox">
+          <div class="video-placeholder">视频生成完成后会显示在这里</div>
+        </div>
+        <div class="result-card">
+          <div class="result-line"><span>请求内容：</span><strong id="promptText">未开始</strong></div>
+          <div class="result-line"><span>Bot ID：</span><strong id="botIdText">未解析</strong></div>
+          <p id="answerText" class="answer-text">智能体的补充说明会显示在这里。</p>
+          <div id="followList" class="follow-list"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
