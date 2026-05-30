@@ -32,11 +32,11 @@
 
 这个仓库主要记录 Coze AI 智能体开发过程中，本地代码如何接入和落地。当前包含 3 个 Demo：
 
-### 3.1 成语接龙智能体 (`Idiom Chain`)
+### 3.1 成语接龙智能体 (`Idiom-Chain`)
 
 **功能：** 用户输入成语，智能体继续接龙。
 
-<video src="Idiom Chain/演示效果.mp4" controls width="600"> </video>
+<video src="Idiom-Chain/演示效果.mp4" controls width="600"> </video>
 
 ### 3.2 历史海报生成智能体 (`history`)
 
