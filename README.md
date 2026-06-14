@@ -36,19 +36,19 @@
 
 **功能：** 用户输入成语，智能体继续接龙。
 
-<video src="Idiom-Chain/演示效果.mp4" controls width="600"> </video>
+https://github.com/user-attachments/assets/a9533f00-76bf-41f5-aef5-f42c91e79643
 
 ### 3.2 历史海报生成智能体 (`history`)
 
 **功能：** 用户输入历史人物、事件或典故，会生成对应海报（存储于我的 OSS）和历史信息总结。
 
-<video src="history/演示效果.mp4" controls width="600"> </video>
+https://github.com/user-attachments/assets/e5c5e4b1-9d70-4369-a8e2-b24665206219
 
 ### 3.3 动物视频生成智能体 (`animal`)
 
 **功能：** 用户输入动物相关描述，生成对应视频（存储于我的 OSS）。
 
-<video src="animal/演示效果.mp4" controls width="600"> </video>
+https://github.com/user-attachments/assets/ace387ce-3277-494e-a5f6-b91cb784759a
 
 ## 4. Coze Python SDK 常用接口
 
